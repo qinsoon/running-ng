@@ -25,7 +25,7 @@ suites:
 
 modifiers:
   gcthreads:
-    type: JuliaGCBenchmarksArg
+    type: ProgramArg
     val: -g {0}
 
 benchmarks:
