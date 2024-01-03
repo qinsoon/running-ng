@@ -43,6 +43,7 @@ skip_timeout: Optional[int]
 skip_log_compression: bool = False
 plugins: Dict[str, Any]
 resume: Optional[str]
+abort_on_fail: bool = False
 
 
 def setup_parser(subparsers):
@@ -63,6 +64,7 @@ def setup_parser(subparsers):
     f.add_argument(
         "--skip-log-compression", action="store_true", help="Skip compressing log files"
     )
+    f.add_argument("--abort-on-fail", action="store_true", help="Abort execution if any benchmark run fails")
 
 
 def getid() -> str:
@@ -326,6 +328,11 @@ def run_one_benchmark(
                 raise ValueError("Not a valid SubprocessrExit value")
             for p in plugins.values():
                 p.end_config(hfac, size, bm, i, c, j, config_passed)
+            if abort_on_fail:
+                if exit_status is not SubprocessrExit.Dryrun or exit_status is not SubprocessrExit.Normal:
+                    import sys
+                    print(f"Run failed with {exit_status}. Abort!")
+                    sys.exit(1)
 
         for p in plugins.values():
             p.end_invocation(hfac, size, bm, i)
@@ -440,6 +447,8 @@ def run(args):
             ensure_remote_dir(log_dir)
         global plugins
         plugins = configuration.get("plugins")
+        global abort_on_fail
+        abort_on_fail = args.get("abort_on_fail")
         if plugins is None:
             plugins = {}
         else:
