@@ -1,4 +1,4 @@
-from running.modifier import JVMArg, Modifier, JSArg, EnvVar
+from running.modifier import JVMArg, Modifier, JSArg, EnvVar, ProgramArg
 from typing import Any, Dict, List, Union
 from pathlib import Path
 import logging
@@ -244,6 +244,23 @@ class JuliaStock(Julia):
 
     def __str__(self):
         return "{} stock version".format(super().__str__())
+
+    def is_oom(self, output: bytes) -> bool:
+        return False
+
+
+@register(Runtime)
+class JuliaStockFixedHeap(Julia):
+    def get_heapsize_modifiers(self, size: int) -> List[Modifier]:
+        size_str = "{}".format(size)
+        heapsize = ProgramArg(
+            name="heap{}".format(size_str),
+            val="--heap-size {}".format(size_str),
+        )
+        return [heapsize]
+
+    def __str__(self):
+        return "{} stock version with fixed heap".format(super().__str__())
 
     def is_oom(self, output: bytes) -> bool:
         return False
