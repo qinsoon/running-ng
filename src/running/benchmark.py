@@ -139,7 +139,11 @@ class Benchmark(object):
                     timeout=self.timeout,
                     cwd=self.override_cwd if self.override_cwd else cwd,
                 )
-                subprocess_exit = SubprocessrExit.Normal
+                subprocess_exit = (
+                    SubprocessrExit.Normal
+                    if p.returncode == 0
+                    else SubprocessrExit.Error
+                )
                 stdout = p.stdout
             except subprocess.CalledProcessError as e:
                 subprocess_exit = SubprocessrExit.Error
