@@ -2,23 +2,31 @@
 `running-ng` is a collection of scripts that help people run workloads in a methodologically sound settings.
 
 ## Installation
-`pip3 install running-ng`
+```bash
+pip3 install running-ng
+# or, to install as an isolated tool:
+uv tool install running-ng
+pipx install running-ng
+```
 
 There are two [extras](https://peps.python.org/pep-0508/#extras) available.
 - `zulip`: dependencies for the `Zulip` `runbms` plugin, useful for users.
 - `tests`: dependencies for running tests, useful for package developers.
 
-## Development setup
-```bash
-virtualenv env
-source env/bin/activate
-pip install -e .[zulip,tests]
-pip install -U pip setuptools build[virtualenv] twine # extra packages for building releases
-```
+To install with the `zulip` extra, append `[zulip]` to the package name, e.g. `uv tool install 'running-ng[zulip]'` or `pipx install 'running-ng[zulip]'`.
 
-- To make a distribution archives, run `python -m build` within the virtual environment.
-- To install to user `site-packages`, run `pip install dist/running_ng-<VERSION>-py3-none-any.whl` outside the virtual environment.
-- To update to PyPI, run `twine upload --repository running-ng dist/*<VERSION>*`.
+## Development setup
+This project uses [`uv`](https://docs.astral.sh/uv/). Install `uv` first, then:
+```bash
+uv sync --group dev --extra zulip
+```
+This creates a `.venv/` and installs all runtime, optional (`zulip`), and dev (`pytest`, `mypy`, `black`) dependencies pinned in `uv.lock`.
+
+Run any tool inside the project environment with `uv run`, e.g. `uv run running <subcommand>`, `uv run pytest`, `uv run mypy --check-untyped-defs src/running`, `uv run black src tests`.
+
+- To make a distribution archives, run `uv build`.
+- To install to user `site-packages`, run `pip install dist/running_ng-<VERSION>-py3-none-any.whl` (or `uv tool install dist/running_ng-<VERSION>-py3-none-any.whl`).
+- To upload to PyPI, run `uv publish dist/*<VERSION>*` (you can also still use `twine upload --repository running-ng dist/*<VERSION>*`).
 
 ## Documentation
 Please refer to [this site](https://anupli.github.io/running-ng/) for up-to-date documentations.

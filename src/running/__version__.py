@@ -1,2 +1,3 @@
-VERSION = (0, 4, 7)
-__VERSION__ = ".".join(map(str, VERSION))
+from importlib.metadata import version
+
+__VERSION__ = version("running-ng")
