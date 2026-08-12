@@ -42,6 +42,7 @@ remote_host: str | None
 skip_oom: int | None
 skip_timeout: int | None
 skip_log_compression: bool = False
+skip_env_dump: bool = False
 randomize_configs: bool = False
 plugins: dict[str, Any]
 resume: str | None
@@ -65,6 +66,11 @@ def setup_parser(subparsers):
     f.add_argument("--workdir", type=Path)
     f.add_argument(
         "--skip-log-compression", action="store_true", help="Skip compressing log files"
+    )
+    f.add_argument(
+        "--skip-env-dump",
+        action="store_true",
+        help="Skip dumping all environment variables into the log",
     )
     f.add_argument(
         "--exit-on-failure",
@@ -219,9 +225,10 @@ def get_log_prologue(runtime: Runtime, bm: Benchmark) -> str:
     output += system("w") + "\n"
     output += system("vmstat 1 2") + "\n"
     output += system("top -bcn 1 -w512 |head -n 12") + "\n"
-    output += "Environment variables: \n"
-    for k, v in sorted(os.environ.items()):
-        output += f"\t{k}={v}\n"
+    if not skip_env_dump:
+        output += "Environment variables: \n"
+        for k, v in sorted(os.environ.items()):
+            output += f"\t{k}={v}\n"
     output += "OS: "
     output += system("uname -a")
     output += "CPU: "
@@ -445,6 +452,8 @@ def run(args):
         skip_timeout = args.get("skip_timeout")
         global skip_log_compression
         skip_log_compression = args.get("skip_log_compression")
+        global skip_env_dump
+        skip_env_dump = args.get("skip_env_dump")
         global exit_on_failure_code
         exit_on_failure_code = args.get("exit_on_failure")
         global randomize_configs
